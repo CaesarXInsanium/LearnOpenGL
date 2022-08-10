@@ -1,4 +1,5 @@
 #include "glad/gl.h"
+#include "mesh.h"
 #include <GLFW/glfw3.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -90,48 +91,22 @@ int main() {
 
   // set up vertex data (and buffer(s)) and configure vertex attributes
   // ------------------------------------------------------------------
-  float vertices[] = {
-      -0.7f,  0.1f,  0.0f, // top right
-      -0.2f,  0.6f, 0.0f, // bottom right
+  float vertices01[] = {
+      -0.7f, 0.1f,  0.0f, // top right
+      -0.2f, 0.6f,  0.0f, // bottom right
       -0.2f, -0.6f, 0.0f, // bottom left
-      0.7f,  0.1f,  0.0f, // top right
-      0.2f,  -0.6f, 0.0f, // bottom right
-      0.2f, 0.6f, 0.0f, // bottom left
   };
 
-  unsigned int indices[] = {0,1,2,3,4,5};
-  int count = 6;
+  unsigned int indices01[] = {0, 1, 2};
+  int count01 = 3;
+  Mesh mesh01 = Mesh_new(vertices01, indices01, count01);
 
-  unsigned int VBO, EBO, VAO;
-  glGenVertexArrays(1, &VAO);
-  glGenBuffers(1, &VBO);
-  glGenBuffers(1, &EBO);
-
-  // bind the Vertex Array Object first, then bind and set vertex buffer(s), and
-  // then configure vertex attributes(s). This binding is remember as we do other things.
-  glBindVertexArray(VAO);
-
-  glBindBuffer(GL_ARRAY_BUFFER, VBO);
-  glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-  glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices,
-               GL_STATIC_DRAW);
-
-  // do this after declaring the VBO and EBO
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void *)0);
-  glEnableVertexAttribArray(0);
-
-  // note that this is allowed, the call to glVertexAttribPointer registered VBO
-  // as the vertex attribute's bound vertex buffer object so afterwards we can
-  // safely unbind
-  glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-  // You can unbind the VAO afterwards so other VAO calls won't accidentally
-  // modify this VAO, but this rarely happens. Modifying other VAOs requires a
-  // call to glBindVertexArray anyways so we generally don't unbind VAOs (nor
-  // VBOs) when it's not directly necessary.
-  glBindVertexArray(0);
+  float vertices02[] = {
+      0.7f,  0.1f,  0.0f, // top right
+      0.2f,  -0.6f, 0.0f, // bottom right
+      0.2f,  0.6f,  0.0f, // bottom left
+  };
+  Mesh mesh02 = Mesh_new(vertices02, indices01, count01);
 
   // uncomment this call to draw in wireframe polygons.
   // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
@@ -150,12 +125,9 @@ int main() {
 
     // draw our first triangle
     glUseProgram(shaderProgram);
-    glBindVertexArray(
-        VAO); // seeing as we only have a single VAO there's no need to bind it
-              // every time, but we'll do so to keep things a bit more organized
-    glDrawElements(GL_TRIANGLES, count,GL_UNSIGNED_INT, 0);
-    // glBindVertexArray(0); // no need to unbind it every time
 
+    Mesh_draw(&mesh01, 0);
+    Mesh_draw(&mesh02, 0);
     // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved
     // etc.)
     // -------------------------------------------------------------------------------
@@ -165,8 +137,7 @@ int main() {
 
   // optional: de-allocate all resources once they've outlived their purpose:
   // ------------------------------------------------------------------------
-  glDeleteVertexArrays(1, &VAO);
-  glDeleteBuffers(1, &VBO);
+  Mesh_destroy(mesh01);
   glDeleteProgram(shaderProgram);
 
   // glfw: terminate, clearing all previously allocated GLFW resources.

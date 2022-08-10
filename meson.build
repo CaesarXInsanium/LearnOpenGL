@@ -14,7 +14,8 @@ project(
   
 SRC = [
   'src/main.c',
-  'src/gl.c'
+  'src/gl.c',
+  'src/mesh.c',
   ]
 INC = include_directories('include')
 
