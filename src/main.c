@@ -91,13 +91,16 @@ int main() {
   // set up vertex data (and buffer(s)) and configure vertex attributes
   // ------------------------------------------------------------------
   float vertices[] = {
-      0.5f,  0.5f,  0.0f, // top right
-      0.5f,  -0.5f, 0.0f, // bottom right
-      -0.5f, -0.5f, 0.0f, // bottom left
-      -0.5f, 0.5f,  0.0f  // top lefteft
+      -0.7f,  0.1f,  0.0f, // top right
+      -0.2f,  0.6f, 0.0f, // bottom right
+      -0.2f, -0.6f, 0.0f, // bottom left
+      0.7f,  0.1f,  0.0f, // top right
+      0.2f,  -0.6f, 0.0f, // bottom right
+      0.2f, 0.6f, 0.0f, // bottom left
   };
 
-  unsigned int indices[] = {0, 1, 3, 1, 2, 3};
+  unsigned int indices[] = {0,1,2,3,4,5};
+  int count = 6;
 
   unsigned int VBO, EBO, VAO;
   glGenVertexArrays(1, &VAO);
@@ -150,7 +153,7 @@ int main() {
     glBindVertexArray(
         VAO); // seeing as we only have a single VAO there's no need to bind it
               // every time, but we'll do so to keep things a bit more organized
-    glDrawElements(GL_TRIANGLES, 6,GL_UNSIGNED_INT, 0);
+    glDrawElements(GL_TRIANGLES, count,GL_UNSIGNED_INT, 0);
     // glBindVertexArray(0); // no need to unbind it every time
 
     // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved
