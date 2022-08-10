@@ -1,5 +1,7 @@
 #include "glad/gl.h"
 #include "mesh.h"
+#include "shader.h"
+
 #include <GLFW/glfw3.h>
 #include <stdbool.h>
 #include <stdio.h>
@@ -10,21 +12,6 @@ void processInput(GLFWwindow *window);
 // settings
 const unsigned int WIDTH = 800;
 const unsigned int HEIGHT = 600;
-
-const char *vertexShaderSource =
-    "#version 330 core\n"
-    "layout (location = 0) in vec3 aPos;\n"
-    "void main()\n"
-    "{\n"
-    "   gl_Position = vec4(aPos.x, aPos.y, aPos.z, 1.0);\n"
-    "}\0";
-const char *fragmentShaderSource =
-    "#version 330 core\n"
-    "out vec4 FragColor;\n"
-    "void main()\n"
-    "{\n"
-    "   FragColor = vec4(1.0f, 0.5f, 0.2f, 1.0f);\n"
-    "}\n\0";
 
 int main() {
   // glfw: initialize and configure
@@ -51,43 +38,13 @@ int main() {
     return -1;
   }
 
-  // build and compile our shader program
-  // ------------------------------------
-  // vertex shader
-  unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
-  glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
-  glCompileShader(vertexShader);
-  // check for shader compile errors
-  int success;
-  char infoLog[512];
-  glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
-  if (!success) {
-    glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-    printf("ERRO: Vertex Shader Compilation failed:\t%s\n", infoLog);
-  }
-  // fragment shader
-  unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
-  glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
-  glCompileShader(fragmentShader);
-  // check for shader compile errors
-  glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
-  if (!success) {
-    glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-    printf("ERRO: Fragment Shader Compilation failed:\t%s\n", infoLog);
-  }
-  // link shaders
-  unsigned int shaderProgram = glCreateProgram();
-  glAttachShader(shaderProgram, vertexShader);
-  glAttachShader(shaderProgram, fragmentShader);
-  glLinkProgram(shaderProgram);
-  // check for linking errors
-  glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-  if (!success) {
-    glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
-    printf("ERRO: Shader Program linking failed:\t%s\n", infoLog);
-  }
-  glDeleteShader(vertexShader);
-  glDeleteShader(fragmentShader);
+  char *vertexShaderSource = loadSourceFile("shaders/vertex.glsl");
+  char *fragmentShaderSource = loadSourceFile("shaders/fragment.glsl");
+  char *fragmentShaderSource02 = loadSourceFile("shaders/fragment01.glsl");
+  GLuint shaderProgram01 =
+      ShaderProgram_fromChar(vertexShaderSource, fragmentShaderSource);
+  GLuint shaderProgram02 =
+      ShaderProgram_fromChar(vertexShaderSource, fragmentShaderSource02);
 
   // set up vertex data (and buffer(s)) and configure vertex attributes
   // ------------------------------------------------------------------
@@ -102,9 +59,9 @@ int main() {
   Mesh mesh01 = Mesh_new(vertices01, indices01, count01);
 
   float vertices02[] = {
-      0.7f,  0.1f,  0.0f, // top right
-      0.2f,  -0.6f, 0.0f, // bottom right
-      0.2f,  0.6f,  0.0f, // bottom left
+      0.7f, 0.1f,  0.0f, // top right
+      0.2f, -0.6f, 0.0f, // bottom right
+      0.2f, 0.6f,  0.0f, // bottom left
   };
   Mesh mesh02 = Mesh_new(vertices02, indices01, count01);
 
@@ -124,9 +81,9 @@ int main() {
     glClear(GL_COLOR_BUFFER_BIT);
 
     // draw our first triangle
-    glUseProgram(shaderProgram);
-
+    glUseProgram(shaderProgram01);
     Mesh_draw(&mesh01, 0);
+    glUseProgram(shaderProgram02);
     Mesh_draw(&mesh02, 0);
     // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved
     // etc.)
@@ -138,7 +95,7 @@ int main() {
   // optional: de-allocate all resources once they've outlived their purpose:
   // ------------------------------------------------------------------------
   Mesh_destroy(mesh01);
-  glDeleteProgram(shaderProgram);
+  glDeleteProgram(shaderProgram01);
 
   // glfw: terminate, clearing all previously allocated GLFW resources.
   // ------------------------------------------------------------------
