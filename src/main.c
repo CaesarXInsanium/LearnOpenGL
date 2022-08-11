@@ -24,7 +24,7 @@ int main() {
   GLFWwindow *window =
       glfwCreateWindow(WIDTH, HEIGHT, "LearnOpenGL", NULL, NULL);
   if (window == NULL) {
-    printf("Failed to create GLFT Window\n");
+    printf("Failed to create GLFW Window\n");
     glfwTerminate();
     return -1;
   }
@@ -32,19 +32,14 @@ int main() {
   glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
 
   // glad: load all OpenGL function pointers
-  // ---------------------------------------
   if (!gladLoadGL(glfwGetProcAddress)) {
     puts("Failed to init GLAD");
     return -1;
   }
 
-  char *vertexShaderSource = loadSourceFile("shaders/vertex.glsl");
-  char *fragmentShaderSource = loadSourceFile("shaders/fragment.glsl");
-  GLuint shaderProgram =
-      ShaderProgram_fromChar(vertexShaderSource, fragmentShaderSource);
+  Shader *shader = Shader_new("shaders/vertex.glsl", "shaders/fragment.glsl");
 
   // set up vertex data (and buffer(s)) and configure vertex attributes
-  // ------------------------------------------------------------------
   float vertices[] = {
       0.5f,  -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom right
       -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, // bottom left
@@ -56,23 +51,20 @@ int main() {
   GLuint perVertexValueCount = 6;
 
   Mesh *mesh = Mesh_new(vertices, indices, vertexCount, perVertexValueCount);
-  // uncomment this call to draw in wireframe polygons.
-  // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
   // render loop
   // -----------
   while (!glfwWindowShouldClose(window)) {
     // input
-    // -----
+
     processInput(window);
 
     // render
-    // ------
+
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    // draw our first triangle
-    glUseProgram(shaderProgram);
+    Shader_use(shader);
 
     Mesh_draw(mesh, 0);
     // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved
@@ -81,12 +73,8 @@ int main() {
     glfwSwapBuffers(window);
     glfwPollEvents();
   }
-
-  // optional: de-allocate all resources once they've outlived their purpose:
-  // ------------------------------------------------------------------------
   Mesh_destroy(mesh);
-  glDeleteProgram(shaderProgram);
-
+  Shader_destroy(shader);
   // glfw: terminate, clearing all previously allocated GLFW resources.
   // ------------------------------------------------------------------
   glfwTerminate();

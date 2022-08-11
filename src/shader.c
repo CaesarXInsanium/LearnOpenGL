@@ -2,6 +2,27 @@
 #include "glad/gl.h"
 #include <GLFW/glfw3.h>
 
+Shader *Shader_new(const char *vertexPath, const char *fragmentPath) {
+  Shader *self = (Shader *)malloc(sizeof(Shader));
+  char *vertexShaderSource = loadSourceFile(vertexPath);
+  char *fragmentShaderSource = loadSourceFile(fragmentPath);
+  GLuint shaderProgram =
+      GLShaderProgram_fromChar(vertexShaderSource, fragmentShaderSource);
+  self->ID = shaderProgram;
+  return self;
+}
+int Shader_destroy(Shader *self) {
+  glDeleteProgram(self->ID);
+  free(self);
+  return EXIT_SUCCESS;
+}
+
+void Shader_use(Shader *self) { glUseProgram(self->ID); }
+
+void Shader_setBool(Shader *self, const char *name, bool value);
+void Shader_setFloat(Shader *self, const char *name, GLfloat value);
+void Shader_setInt(Shader *self, const char *name, GLint value);
+
 char *loadSourceFile(const char *path) {
   char *source = NULL;
   FILE *fp = fopen(path, "r");
@@ -32,8 +53,8 @@ char *loadSourceFile(const char *path) {
   return source;
 }
 
-GLuint ShaderProgram_fromChar(const char *vertexShaderSource,
-                              const char *fragmentShaderSource) {
+GLuint GLShaderProgram_fromChar(const char *vertexShaderSource,
+                                const char *fragmentShaderSource) {
 
   // build and compile our shader program
   // ------------------------------------
