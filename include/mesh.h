@@ -10,7 +10,7 @@ typedef struct Mesh_ {
   GLuint count;
 } Mesh;
 
-Mesh *Mesh_new(GLfloat *vertices, GLuint *indices, GLuint count);
+Mesh *Mesh_new(GLfloat *vertices, GLuint *indices, GLuint vertexCount, GLuint perVertexValueCount);
 int Mesh_draw(Mesh *mesh, GLvoid *instances);
 int Mesh_destroy(Mesh *mesh);
 

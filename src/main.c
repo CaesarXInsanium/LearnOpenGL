@@ -45,23 +45,17 @@ int main() {
 
   // set up vertex data (and buffer(s)) and configure vertex attributes
   // ------------------------------------------------------------------
-  float vertices01[] = {
-      -0.5f, 0.0f, 0.0f, // top right
-      0.0f,  0.5f, 0.0f, // bottom right
-      0.5f,  0.0f, 0.0f, // bottom left
+  float vertices[] = {
+      0.5f,  -0.5f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom right
+      -0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, // bottom left
+      0.0f,  0.5f,  0.0f, 0.0f, 0.0f, 1.0f  // top
   };
 
-  unsigned int indices01[] = {0, 1, 2};
-  int count01 = 3;
-  Mesh *mesh01 = Mesh_new(vertices01, indices01, count01);
+  unsigned int indices[] = {0, 1, 2};
+  GLuint vertexCount = 3;
+  GLuint perVertexValueCount = 6;
 
-  float vertices02[] = {
-      0.7f, 0.1f,  0.0f, // top right
-      0.2f, -0.6f, 0.0f, // bottom right
-      0.2f, 0.6f,  0.0f, // bottom left
-  };
-  Mesh *mesh02 = Mesh_new(vertices02, indices01, count01);
-
+  Mesh *mesh = Mesh_new(vertices, indices, vertexCount, perVertexValueCount);
   // uncomment this call to draw in wireframe polygons.
   // glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
@@ -77,17 +71,10 @@ int main() {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    // Uniforms
-    GLfloat timeValue = glfwGetTime();
-    GLfloat greenValue = (sin(timeValue) / 2.0f) + 0.5;
-    GLint vertexColorlocation = glGetUniformLocation(shaderProgram, "ourColor");
-
     // draw our first triangle
     glUseProgram(shaderProgram);
-    glUniform4f(vertexColorlocation, 0.0f, greenValue, 0.0f, 1.0f);
 
-    Mesh_draw(mesh01, 0);
-    Mesh_draw(mesh02, 0);
+    Mesh_draw(mesh, 0);
     // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved
     // etc.)
     // -------------------------------------------------------------------------------
@@ -97,8 +84,7 @@ int main() {
 
   // optional: de-allocate all resources once they've outlived their purpose:
   // ------------------------------------------------------------------------
-  Mesh_destroy(mesh01);
-  Mesh_destroy(mesh02);
+  Mesh_destroy(mesh);
   glDeleteProgram(shaderProgram);
 
   // glfw: terminate, clearing all previously allocated GLFW resources.

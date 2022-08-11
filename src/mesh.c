@@ -3,7 +3,8 @@
 #include <GLFW/glfw3.h>
 #include <stdlib.h>
 
-Mesh *Mesh_new(GLfloat *vertices, GLuint *indices, GLuint count) {
+Mesh *Mesh_new(GLfloat *vertices, GLuint *indices, GLuint vertexCount,
+               GLuint perVertexValueCount) {
   Mesh *mesh = (Mesh *)malloc(sizeof(Mesh));
 
   unsigned int VBO, EBO, VAO;
@@ -19,18 +20,21 @@ Mesh *Mesh_new(GLfloat *vertices, GLuint *indices, GLuint count) {
   glBindBuffer(GL_ARRAY_BUFFER, VBO);
   // sets bufer type, size of entire array in bytes, pointer to array, and
   // read/write permissions
-  glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * count * 3, vertices,
+  glBufferData(GL_ARRAY_BUFFER,
+               sizeof(GLfloat) * vertexCount * perVertexValueCount, vertices,
                GL_STATIC_DRAW);
 
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices) * count, indices,
+  glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices) * vertexCount, indices,
                GL_STATIC_DRAW);
 
   // do this after declaring the VBO and EBO
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(GLfloat),
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat),
                         (void *)0);
   glEnableVertexAttribArray(0);
-
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat),
+                        (void *)(3 * sizeof(GLfloat)));
+  glEnableVertexAttribArray(1);
   // note that this is allowed, the call to glVertexAttribPointer registered VBO
   // as the vertex attribute's bound vertex buffer object so afterwards we can
   // safely unbind
@@ -45,7 +49,7 @@ Mesh *Mesh_new(GLfloat *vertices, GLuint *indices, GLuint count) {
   mesh->VAO = VAO;
   mesh->VBO = VBO;
   mesh->EBO = EBO;
-  mesh->count = count;
+  mesh->count = vertexCount;
   return mesh;
 }
 int Mesh_draw(Mesh *mesh, GLvoid *instances) {
