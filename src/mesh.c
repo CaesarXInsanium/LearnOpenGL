@@ -1,9 +1,10 @@
 #include "mesh.h"
 #include "glad/gl.h"
 #include <GLFW/glfw3.h>
+#include <stdlib.h>
 
-Mesh Mesh_new(GLfloat *vertices, GLuint *indices, GLuint count) {
-  Mesh mesh;
+Mesh *Mesh_new(GLfloat *vertices, GLuint *indices, GLuint count) {
+  Mesh *mesh = (Mesh *)malloc(sizeof(Mesh));
 
   unsigned int VBO, EBO, VAO;
   glGenVertexArrays(1, &VAO);
@@ -40,10 +41,11 @@ Mesh Mesh_new(GLfloat *vertices, GLuint *indices, GLuint count) {
   // call to glBindVertexArray anyways so we generally don't unbind VAOs (nor
   // VBOs) when it's not directly necessary.
   glBindVertexArray(0);
-  mesh.VAO = VAO;
-  mesh.VBO = VBO;
-  mesh.EBO = EBO;
-  mesh.count = count;
+
+  mesh->VAO = VAO;
+  mesh->VBO = VBO;
+  mesh->EBO = EBO;
+  mesh->count = count;
   return mesh;
 }
 int Mesh_draw(Mesh *mesh, GLvoid *instances) {
@@ -54,8 +56,9 @@ int Mesh_draw(Mesh *mesh, GLvoid *instances) {
   glDrawElements(GL_TRIANGLES, mesh->count, GL_UNSIGNED_INT, instances);
   return 0;
 }
-int Mesh_destroy(Mesh mesh) {
-  glDeleteVertexArrays(1, &mesh.VAO);
-  glDeleteBuffers(1, &mesh.VBO);
+int Mesh_destroy(Mesh *mesh) {
+  glDeleteVertexArrays(1, &mesh->VAO);
+  glDeleteBuffers(1, &mesh->VBO);
+  free(mesh);
   return 0;
 }
