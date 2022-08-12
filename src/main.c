@@ -53,7 +53,8 @@ int main() {
   Mesh *mesh = Mesh_new(vertices, indices, vertexCount, perVertexValueCount);
 
   // render loop
-  // -----------
+  // ----------
+  GLfloat offset = 0.4;
   while (!glfwWindowShouldClose(window)) {
     // input
 
@@ -65,6 +66,7 @@ int main() {
     glClear(GL_COLOR_BUFFER_BIT);
 
     Shader_use(shader);
+    Shader_setFloat(shader, "offset", offset);
 
     Mesh_draw(mesh, 0);
     // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved
