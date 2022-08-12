@@ -1,6 +1,7 @@
 #include "mesh.h"
 #include "glad/gl.h"
 #include <GLFW/glfw3.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 Mesh *Mesh_new(GLfloat *vertices, GLuint *indices, GLuint vertexCount,
@@ -27,14 +28,19 @@ Mesh *Mesh_new(GLfloat *vertices, GLuint *indices, GLuint vertexCount,
   glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
   glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices) * vertexCount, indices,
                GL_STATIC_DRAW);
-
   // do this after declaring the VBO and EBO
-  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat),
-                        (void *)0);
+  glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
+                        perVertexValueCount * sizeof(GLfloat), (void *)0);
   glEnableVertexAttribArray(0);
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat),
+  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,
+                        perVertexValueCount * sizeof(GLfloat),
                         (void *)(3 * sizeof(GLfloat)));
   glEnableVertexAttribArray(1);
+
+  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE,
+                        perVertexValueCount * sizeof(GLfloat),
+                        (void *)(6 * sizeof(GLfloat)));
+  glEnableVertexAttribArray(2);
   // note that this is allowed, the call to glVertexAttribPointer registered VBO
   // as the vertex attribute's bound vertex buffer object so afterwards we can
   // safely unbind
@@ -52,13 +58,14 @@ Mesh *Mesh_new(GLfloat *vertices, GLuint *indices, GLuint vertexCount,
   mesh->count = vertexCount;
   return mesh;
 }
-int Mesh_draw(Mesh *mesh, GLvoid *instances) {
+int Mesh_draw(Mesh *mesh, GLvoid *instances, GLuint texture) {
 
+  glBindTexture(GL_TEXTURE_2D, texture);
   glBindVertexArray(mesh->VAO); // seeing as we only have a single VAO there's
                                 // no need to bind it every time, but we'll do
                                 // so to keep things a bit more organized
   glDrawElements(GL_TRIANGLES, mesh->count, GL_UNSIGNED_INT, instances);
-  return 0;
+  return EXIT_SUCCESS;
 }
 int Mesh_destroy(Mesh *mesh) {
   glDeleteVertexArrays(1, &mesh->VAO);
