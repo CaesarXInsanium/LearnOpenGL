@@ -8,6 +8,7 @@ Shader *Shader_new(const char *vertexPath, const char *fragmentPath) {
   char *fragmentShaderSource = loadSourceFile(fragmentPath);
   GLuint shaderProgram =
       GLShaderProgram_fromChar(vertexShaderSource, fragmentShaderSource);
+
   self->ID = shaderProgram;
   return self;
 }
@@ -19,9 +20,17 @@ int Shader_destroy(Shader *self) {
 
 void Shader_use(Shader *self) { glUseProgram(self->ID); }
 
-void Shader_setBool(Shader *self, const char *name, bool value);
-void Shader_setFloat(Shader *self, const char *name, GLfloat value);
-void Shader_setInt(Shader *self, const char *name, GLint value);
+void Shader_setBool(Shader *self, const char *name, bool value) {
+  glUniform1i(glGetUniformLocation(self->ID, name), (int)value);
+}
+void Shader_setFloat(Shader *self, const char *name, GLfloat value) {
+
+  glUniform1f(glGetUniformLocation(self->ID, name), value);
+}
+void Shader_setInt(Shader *self, const char *name, GLint value) {
+
+  glUniform1i(glGetUniformLocation(self->ID, name), value);
+}
 
 char *loadSourceFile(const char *path) {
   char *source = NULL;
