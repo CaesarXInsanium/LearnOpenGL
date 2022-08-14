@@ -41,9 +41,10 @@ int main() {
 
   Shader *shader = Shader_new("shaders/vertex.glsl", "shaders/fragment.glsl");
   // Textures
-  GLuint texture;
-  glGenTextures(1, &texture);
-  glBindTexture(GL_TEXTURE_2D, texture);
+  GLuint texture1, texture2;
+
+  glGenTextures(1, &texture1);
+  glBindTexture(GL_TEXTURE_2D, texture1);
   // s and t denotes coordinate positions of the textures
   // sets wrapping behaviours for dimensions beyond normalized positions
   // for s and t axis
@@ -52,26 +53,40 @@ int main() {
 
   // denotes which colors each pixel will be given the coodirnates and nearest
   // texel
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-  // sets options for generating lower resolution versions of textures for easy
-  // interpolation
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER,
-                  GL_LINEAR_MIPMAP_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER,
-                  GL_LINEAR_MIPMAP_LINEAR);
+  stbi_set_flip_vertically_on_load(true);
 
   GLint width, height, nrChannels;
-  unsigned char *data =
+  unsigned char *data0 =
       stbi_load("images/container.jpg", &width, &height, &nrChannels, 0);
-  if (data) {
+  if (data0) {
 
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB,
-                 GL_UNSIGNED_BYTE, data);
+                 GL_UNSIGNED_BYTE, data0);
     glGenerateMipmap(GL_TEXTURE_2D);
   }
-  stbi_image_free(data);
+  stbi_image_free(data0);
+
+  glGenTextures(1, &texture2);
+  glBindTexture(GL_TEXTURE_2D, texture2);
+
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_REPEAT);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_REPEAT);
+
+  GLint width1, height1, nrChannels1;
+  unsigned char *data1 =
+      stbi_load("images/awesomeface.png", &width1, &height1, &nrChannels1, 0);
+  if (data1) {
+
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width1, height1, 0, GL_RGB,
+                 GL_UNSIGNED_BYTE, data1);
+    glGenerateMipmap(GL_TEXTURE_2D);
+  }
+  stbi_image_free(data1);
   // set up vertex data (and buffer(s)) and configure vertex attributes
   float vertices[] = {
       0.5f,  0.5f,  0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // top right
@@ -88,7 +103,8 @@ int main() {
   GLuint perVertexValueCount = 8;
 
   Mesh *mesh = Mesh_new(vertices, indices, vertexCount, perVertexValueCount);
-
+  Shader_setInt(shader, "texture1", 0);
+  Shader_setInt(shader, "texture2", 1);
   // render loop
   // ----------
   while (!glfwWindowShouldClose(window)) {
@@ -101,9 +117,14 @@ int main() {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
 
-    Shader_use(shader);
+    glActiveTexture(GL_TEXTURE0);
+    glBindTexture(GL_TEXTURE_2D, texture1);
 
-    Mesh_draw(mesh, 0, texture);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, texture2);
+
+    Shader_use(shader);
+    Mesh_draw(mesh, 0);
     // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved
     // etc.)
     // -------------------------------------------------------------------------------

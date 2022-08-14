@@ -58,9 +58,7 @@ Mesh *Mesh_new(GLfloat *vertices, GLuint *indices, GLuint vertexCount,
   mesh->count = vertexCount;
   return mesh;
 }
-int Mesh_draw(Mesh *mesh, GLvoid *instances, GLuint texture) {
-
-  glBindTexture(GL_TEXTURE_2D, texture);
+int Mesh_draw(Mesh *mesh, GLvoid *instances) {
   glBindVertexArray(mesh->VAO); // seeing as we only have a single VAO there's
                                 // no need to bind it every time, but we'll do
                                 // so to keep things a bit more organized
