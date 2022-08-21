@@ -12,6 +12,7 @@
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
+#include <time.h>
 #define M_PI 3.14159265358979323846264338327950288
 #define glm_radians(angleInDegrees) ((angleInDegrees)*M_PI / 180.0)
 
@@ -138,27 +139,24 @@ int main() {
     Shader_use(shader);
 
     // transforms
-    mat4 transform_matrix = {
-        {1.0, 1.0, 1.0, 1.0},
-        {1.0, 1.0, 1.0, 1.0},
-        {1.0, 1.0, 1.0, 1.0},
-        {1.0, 1.0, 1.0, 1.0},
-    };
-    glm_mat4_identity(transform_matrix);
-
+    mat4 transform_matrix = GLM_MAT4_IDENTITY_INIT;
     vec3 axis = {0.0, 0.0, 1.0};
-    glm_rotate(transform_matrix, glm_radians((float)glfwGetTimerValue()), axis);
+    glm_rotate(transform_matrix, (float)glfwGetTimerValue(), axis);
 
     vec3 translation = {0.5, -0.5, 0.0};
     glm_translate(transform_matrix, translation);
     float scale_factor = 0.5;
     glm_mat4_scale(transform_matrix, scale_factor);
-
     Shader_setMat4(shader, "transform", (GLfloat *)transform_matrix);
     Mesh_draw(mesh, 0);
+
+    mat4 other_matrix = GLM_MAT4_IDENTITY_INIT;
+    GLfloat s = (GLfloat)glfwGetTimerValue();
+    glm_mat4_scale(other_matrix, sinf(s));
+    Shader_setMat4(shader, "transform", (GLfloat *)other_matrix);
+    Mesh_draw(mesh, 0);
+
     // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved
-    // etc.)
-    // -------------------------------------------------------------------------------
     glfwSwapBuffers(window);
     glfwPollEvents();
   }
