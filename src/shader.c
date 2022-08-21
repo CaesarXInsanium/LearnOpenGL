@@ -32,6 +32,10 @@ void Shader_setInt(Shader *self, const char *name, GLint value) {
   glUniform1i(glGetUniformLocation(self->ID, name), value);
 }
 
+void Shader_setMat4(Shader *self, const char *name, GLfloat *value) {
+  glUniformMatrix4fv(glGetUniformLocation(self->ID, name), 1, GL_FALSE, value);
+}
+
 char *loadSourceFile(const char *path) {
   char *source = NULL;
   FILE *fp = fopen(path, "r");

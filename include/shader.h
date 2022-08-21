@@ -18,6 +18,7 @@ void Shader_use(Shader *self);
 void Shader_setBool(Shader *self, const char *name, bool value);
 void Shader_setFloat(Shader *self, const char *name, GLfloat value);
 void Shader_setInt(Shader *self, const char *name, GLint value);
+void Shader_setMat4(Shader *self, const char *name, GLfloat *value);
 
 // stolen from:
 // https://stackoverflow.com/questions/2029103/correct-way-to-read-a-text-file-into-a-buffer-in-c

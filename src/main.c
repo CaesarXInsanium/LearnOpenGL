@@ -128,7 +128,7 @@ int main() {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
     glClear(GL_DEPTH_BUFFER_BIT);
-    
+
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture1);
 
@@ -145,15 +145,16 @@ int main() {
         {1.0, 1.0, 1.0, 1.0},
     };
     glm_mat4_identity(transform_matrix);
-    vec3 translation = {0.5, -0.5, 0.0};
-    glm_translate(transform_matrix, translation);
+
     vec3 axis = {0.0, 0.0, 1.0};
     glm_rotate(transform_matrix, glm_radians((float)glfwGetTimerValue()), axis);
+
+    vec3 translation = {0.5, -0.5, 0.0};
+    glm_translate(transform_matrix, translation);
     float scale_factor = 0.5;
     glm_mat4_scale(transform_matrix, scale_factor);
 
-    GLuint transformLoc = glGetUniformLocation(shader->ID, "transform");
-    glUniformMatrix4fv(transformLoc, 1, GL_FALSE, (GLfloat *)transform_matrix);
+    Shader_setMat4(shader, "transform", (GLfloat *)transform_matrix);
     Mesh_draw(mesh, 0);
     // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved
     // etc.)
