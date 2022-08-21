@@ -90,11 +90,10 @@ int main() {
       stbi_load("images/awesomeface.png", &width1, &height1, &nrChannels1, 0);
   if (data1) {
 
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width1, height1, 0, GL_RGB,
+    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width1, height1, 0, GL_RGBA,
                  GL_UNSIGNED_BYTE, data1);
     glGenerateMipmap(GL_TEXTURE_2D);
   }
-  glBindTexture(GL_TEXTURE_2D, 0);
   stbi_image_free(data1);
   // set up vertex data (and buffer(s)) and configure vertex attributes
   float vertices[] = {
@@ -129,7 +128,7 @@ int main() {
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
     glClear(GL_COLOR_BUFFER_BIT);
     glClear(GL_DEPTH_BUFFER_BIT);
-
+    
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture1);
 
