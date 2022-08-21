@@ -1,12 +1,19 @@
+#include <cglm/struct/affine.h>
 #define STB_IMAGE_IMPLEMENTATION
 #include "glad/gl.h"
 #include "mesh.h"
 #include "shader.h"
 #include "stb_image.h"
 #include <GLFW/glfw3.h>
+#include <cglm/cglm.h>
+#include <cglm/common.h>
+#include <cglm/mat4.h>
+#include <cglm/vec4.h>
 #include <math.h>
 #include <stdbool.h>
 #include <stdio.h>
+#define M_PI 3.14159265358979323846264338327950288
+#define glm_radians(angleInDegrees) ((angleInDegrees)*M_PI / 180.0)
 
 void framebuffer_size_callback(GLFWwindow *window, int width, int height);
 void processInput(GLFWwindow *window);
@@ -22,6 +29,7 @@ int main() {
   glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
   glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
   glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+  glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
 
   GLFWwindow *window =
       glfwCreateWindow(WIDTH, HEIGHT, "LearnOpenGL", NULL, NULL);
@@ -86,6 +94,7 @@ int main() {
                  GL_UNSIGNED_BYTE, data1);
     glGenerateMipmap(GL_TEXTURE_2D);
   }
+  glBindTexture(GL_TEXTURE_2D, 0);
   stbi_image_free(data1);
   // set up vertex data (and buffer(s)) and configure vertex attributes
   float vertices[] = {
@@ -103,10 +112,13 @@ int main() {
   GLuint perVertexValueCount = 8;
 
   Mesh *mesh = Mesh_new(vertices, indices, vertexCount, perVertexValueCount);
+
+  // Matrices
+
+  // render loop
+  Shader_use(shader);
   Shader_setInt(shader, "texture1", 0);
   Shader_setInt(shader, "texture2", 1);
-  // render loop
-  // ----------
   while (!glfwWindowShouldClose(window)) {
     // input
 
@@ -125,6 +137,24 @@ int main() {
     glBindTexture(GL_TEXTURE_2D, texture2);
 
     Shader_use(shader);
+
+    // transforms
+    mat4 transform_matrix = {
+        {1.0, 1.0, 1.0, 1.0},
+        {1.0, 1.0, 1.0, 1.0},
+        {1.0, 1.0, 1.0, 1.0},
+        {1.0, 1.0, 1.0, 1.0},
+    };
+    glm_mat4_identity(transform_matrix);
+    vec3 translation = {0.5, -0.5, 0.0};
+    glm_translate(transform_matrix, translation);
+    vec3 axis = {0.0, 0.0, 1.0};
+    glm_rotate(transform_matrix, glm_radians((float)glfwGetTimerValue()), axis);
+    float scale_factor = 0.5;
+    glm_mat4_scale(transform_matrix, scale_factor);
+
+    GLuint transformLoc = glGetUniformLocation(shader->ID, "transform");
+    glUniformMatrix4fv(transformLoc, 1, GL_FALSE, (GLfloat *)transform_matrix);
     Mesh_draw(mesh, 0);
     // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved
     // etc.)
