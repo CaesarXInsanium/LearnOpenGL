@@ -30,6 +30,7 @@ App *App_new(const char *name, const int width, const int height) {
     puts("Failed to init GLAD");
     exit(1);
   }
+  glEnable(GL_DEPTH_TEST);
   return self;
 }
 int App_should_close(App *self) { return glfwWindowShouldClose(self->window); }

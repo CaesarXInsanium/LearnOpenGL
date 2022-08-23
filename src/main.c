@@ -117,13 +117,17 @@ int main() {
   Shader_use(shader);
   Shader_setInt(shader, "texture1", 0);
   Shader_setInt(shader, "texture2", 1);
+  GLuint start_time = glfwGetTimerValue();
   while (!App_should_close(app)) {
+    GLuint current_time = glfwGetTimerValue();
+    current_time = current_time - start_time;
+    GLfloat time = 0.00000001 * (GLfloat)current_time;
+
     App_handle_inputs(app);
     // render
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-    glClear(GL_COLOR_BUFFER_BIT);
-    glClear(GL_DEPTH_BUFFER_BIT);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture1);
@@ -136,25 +140,19 @@ int main() {
     // transforms
     mat4 model_matrix = GLM_MAT4_IDENTITY_INIT;
     vec3 model_axis = {0.5, 1.0, 0.0};
-    glm_rotate(model_matrix, glm_radians((GLfloat)glfwGetTimerValue() * glm_radians(50.0)), model_axis);
+    glm_rotate(model_matrix, time, model_axis);
 
     mat4 view_matrix = GLM_MAT4_IDENTITY_INIT;
     vec3 view_translation = {0.0, 0.0, -3.0};
     glm_translate(view_matrix, view_translation);
 
     mat4 projection_matrix = GLM_MAT4_IDENTITY_INIT;
-    glm_perspective(glm_radians(45.0), WIDTH / HEIGHT, 0.1, 100.0,
-                    projection_matrix);
+    glm_perspective(glm_radians(100.0), (GLfloat)WIDTH / (GLfloat)HEIGHT, 0.1,
+                    100.0, projection_matrix);
 
     Shader_setMat4(shader, "model", (GLfloat *)model_matrix);
     Shader_setMat4(shader, "view", (GLfloat *)view_matrix);
     Shader_setMat4(shader, "projection", (GLfloat *)projection_matrix);
-    Mesh_draw(mesh, 0);
-
-    mat4 other_matrix = GLM_MAT4_IDENTITY_INIT;
-    GLfloat s = (GLfloat)glfwGetTimerValue();
-    glm_mat4_scale(other_matrix, sinf(s));
-    Shader_setMat4(shader, "transform", (GLfloat *)other_matrix);
     Mesh_draw(mesh, 0);
 
     App_handle_events(app);
