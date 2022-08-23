@@ -1,10 +1,12 @@
 #include <cglm/struct/affine.h>
 #define STB_IMAGE_IMPLEMENTATION
+#include "app.h"
 #include "glad/gl.h"
 #include "mesh.h"
 #include "shader.h"
 #include "stb_image.h"
 #include <GLFW/glfw3.h>
+#include <cglm/cam.h>
 #include <cglm/cglm.h>
 #include <cglm/common.h>
 #include <cglm/mat4.h>
@@ -16,37 +18,15 @@
 #define M_PI 3.14159265358979323846264338327950288
 #define glm_radians(angleInDegrees) ((angleInDegrees)*M_PI / 180.0)
 
-void framebuffer_size_callback(GLFWwindow *window, int width, int height);
-void processInput(GLFWwindow *window);
-
 // settings
 const unsigned int WIDTH = 800;
-const unsigned int HEIGHT = 800;
+const unsigned int HEIGHT = 600;
 
 int main() {
   // glfw: initialize and configure
   // ------------------------------
-  glfwInit();
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-  glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-  glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-  glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-
-  GLFWwindow *window =
-      glfwCreateWindow(WIDTH, HEIGHT, "LearnOpenGL", NULL, NULL);
-  if (window == NULL) {
-    printf("Failed to create GLFW Window\n");
-    glfwTerminate();
-    return -1;
-  }
-  glfwMakeContextCurrent(window);
-  glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
-
-  // glad: load all OpenGL function pointers
-  if (!gladLoadGL(glfwGetProcAddress)) {
-    puts("Failed to init GLAD");
-    return -1;
-  }
+  App *app = App_new("LearnOpenGL", WIDTH, HEIGHT);
+  App_set_resize_callback(app, framebuffer_size_callback);
 
   Shader *shader = Shader_new("shaders/vertex.glsl", "shaders/fragment.glsl");
   // Textures
@@ -98,18 +78,36 @@ int main() {
   stbi_image_free(data1);
   // set up vertex data (and buffer(s)) and configure vertex attributes
   float vertices[] = {
-      0.5f,  0.5f,  0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // top right
-      0.5f,  -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // bottom right
-      -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom left
-      -0.5f, 0.5f,  0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f  // top left
-  };
+      -0.5f, -0.5f, -0.5f, 0.0f, 0.0f, 0.5f,  -0.5f, -0.5f, 1.0f, 0.0f,
+      0.5f,  0.5f,  -0.5f, 1.0f, 1.0f, 0.5f,  0.5f,  -0.5f, 1.0f, 1.0f,
+      -0.5f, 0.5f,  -0.5f, 0.0f, 1.0f, -0.5f, -0.5f, -0.5f, 0.0f, 0.0f,
+
+      -0.5f, -0.5f, 0.5f,  0.0f, 0.0f, 0.5f,  -0.5f, 0.5f,  1.0f, 0.0f,
+      0.5f,  0.5f,  0.5f,  1.0f, 1.0f, 0.5f,  0.5f,  0.5f,  1.0f, 1.0f,
+      -0.5f, 0.5f,  0.5f,  0.0f, 1.0f, -0.5f, -0.5f, 0.5f,  0.0f, 0.0f,
+
+      -0.5f, 0.5f,  0.5f,  1.0f, 0.0f, -0.5f, 0.5f,  -0.5f, 1.0f, 1.0f,
+      -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+      -0.5f, -0.5f, 0.5f,  0.0f, 0.0f, -0.5f, 0.5f,  0.5f,  1.0f, 0.0f,
+
+      0.5f,  0.5f,  0.5f,  1.0f, 0.0f, 0.5f,  0.5f,  -0.5f, 1.0f, 1.0f,
+      0.5f,  -0.5f, -0.5f, 0.0f, 1.0f, 0.5f,  -0.5f, -0.5f, 0.0f, 1.0f,
+      0.5f,  -0.5f, 0.5f,  0.0f, 0.0f, 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+
+      -0.5f, -0.5f, -0.5f, 0.0f, 1.0f, 0.5f,  -0.5f, -0.5f, 1.0f, 1.0f,
+      0.5f,  -0.5f, 0.5f,  1.0f, 0.0f, 0.5f,  -0.5f, 0.5f,  1.0f, 0.0f,
+      -0.5f, -0.5f, 0.5f,  0.0f, 0.0f, -0.5f, -0.5f, -0.5f, 0.0f, 1.0f,
+
+      -0.5f, 0.5f,  -0.5f, 0.0f, 1.0f, 0.5f,  0.5f,  -0.5f, 1.0f, 1.0f,
+      0.5f,  0.5f,  0.5f,  1.0f, 0.0f, 0.5f,  0.5f,  0.5f,  1.0f, 0.0f,
+      -0.5f, 0.5f,  0.5f,  0.0f, 0.0f, -0.5f, 0.5f,  -0.5f, 0.0f, 1.0f};
 
   unsigned int indices[] = {
-      0, 1, 3, // first triangle
-      1, 2, 3  // second triangle
+      0,  1,  2,  3,  4,  5,  6,  7,  8,  9,  10, 11, 12, 13, 14, 15, 16, 17,
+      18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35,
   };
-  GLuint vertexCount = 6;
-  GLuint perVertexValueCount = 8;
+  GLuint vertexCount = 36;
+  GLuint perVertexValueCount = 5;
 
   Mesh *mesh = Mesh_new(vertices, indices, vertexCount, perVertexValueCount);
 
@@ -119,11 +117,8 @@ int main() {
   Shader_use(shader);
   Shader_setInt(shader, "texture1", 0);
   Shader_setInt(shader, "texture2", 1);
-  while (!glfwWindowShouldClose(window)) {
-    // input
-
-    processInput(window);
-
+  while (!App_should_close(app)) {
+    App_handle_inputs(app);
     // render
 
     glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -139,15 +134,21 @@ int main() {
     Shader_use(shader);
 
     // transforms
-    mat4 transform_matrix = GLM_MAT4_IDENTITY_INIT;
-    vec3 axis = {0.0, 0.0, 1.0};
-    glm_rotate(transform_matrix, (float)glfwGetTimerValue(), axis);
+    mat4 model_matrix = GLM_MAT4_IDENTITY_INIT;
+    vec3 model_axis = {0.5, 1.0, 0.0};
+    glm_rotate(model_matrix, glm_radians((GLfloat)glfwGetTimerValue() * glm_radians(50.0)), model_axis);
 
-    vec3 translation = {0.5, -0.5, 0.0};
-    glm_translate(transform_matrix, translation);
-    float scale_factor = 0.5;
-    glm_mat4_scale(transform_matrix, scale_factor);
-    Shader_setMat4(shader, "transform", (GLfloat *)transform_matrix);
+    mat4 view_matrix = GLM_MAT4_IDENTITY_INIT;
+    vec3 view_translation = {0.0, 0.0, -3.0};
+    glm_translate(view_matrix, view_translation);
+
+    mat4 projection_matrix = GLM_MAT4_IDENTITY_INIT;
+    glm_perspective(glm_radians(45.0), WIDTH / HEIGHT, 0.1, 100.0,
+                    projection_matrix);
+
+    Shader_setMat4(shader, "model", (GLfloat *)model_matrix);
+    Shader_setMat4(shader, "view", (GLfloat *)view_matrix);
+    Shader_setMat4(shader, "projection", (GLfloat *)projection_matrix);
     Mesh_draw(mesh, 0);
 
     mat4 other_matrix = GLM_MAT4_IDENTITY_INIT;
@@ -156,30 +157,10 @@ int main() {
     Shader_setMat4(shader, "transform", (GLfloat *)other_matrix);
     Mesh_draw(mesh, 0);
 
-    // glfw: swap buffers and poll IO events (keys pressed/released, mouse moved
-    glfwSwapBuffers(window);
-    glfwPollEvents();
+    App_handle_events(app);
   }
   Mesh_destroy(mesh);
   Shader_destroy(shader);
-  // glfw: terminate, clearing all previously allocated GLFW resources.
-  // ------------------------------------------------------------------
-  glfwTerminate();
+  App_destroy(app);
   return 0;
-}
-
-// process all input: query GLFW whether relevant keys are pressed/released this
-// frame and react accordingly
-// ---------------------------------------------------------------------------------------------------------
-void processInput(GLFWwindow *window) {
-  if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)
-    glfwSetWindowShouldClose(window, true);
-}
-
-// glfw: whenever the window size changed (by OS or user resize) this callback
-// function executes
-// ---------------------------------------------------------------------------------------------
-void framebuffer_size_callback(GLFWwindow *window, int width, int height) {
-  printf("Window Framebuffer Size Callback:\t%p\n", (void *)window);
-  glViewport(0, 0, width, height);
 }

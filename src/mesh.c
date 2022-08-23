@@ -32,15 +32,15 @@ Mesh *Mesh_new(GLfloat *vertices, GLuint *indices, GLuint vertexCount,
   glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE,
                         perVertexValueCount * sizeof(GLfloat), (void *)0);
   glEnableVertexAttribArray(0);
-  glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,
+  // glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE,
+  //                       perVertexValueCount * sizeof(GLfloat),
+  //                       (void *)(3 * sizeof(GLfloat)));
+  // glEnableVertexAttribArray(1);
+
+  glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE,
                         perVertexValueCount * sizeof(GLfloat),
                         (void *)(3 * sizeof(GLfloat)));
   glEnableVertexAttribArray(1);
-
-  glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE,
-                        perVertexValueCount * sizeof(GLfloat),
-                        (void *)(6 * sizeof(GLfloat)));
-  glEnableVertexAttribArray(2);
   // note that this is allowed, the call to glVertexAttribPointer registered VBO
   // as the vertex attribute's bound vertex buffer object so afterwards we can
   // safely unbind
