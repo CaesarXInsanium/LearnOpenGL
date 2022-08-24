@@ -7,6 +7,8 @@ void processInput(GLFWwindow *window);
 
 typedef struct App {
   GLFWwindow *window;
+  GLuint width;
+  GLuint height;
 } App;
 
 App *App_new(const char *name, const int width, const int height);
@@ -16,4 +18,5 @@ void App_set_resize_callback(App *self,
                                               int height));
 void App_handle_events(App *self);
 void App_handle_inputs(App *self);
+GLfloat App_fov(App *self);
 void App_destroy(App *self);

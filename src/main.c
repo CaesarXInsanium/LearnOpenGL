@@ -6,6 +6,7 @@
 #include "shader.h"
 #include "stb_image.h"
 #include <GLFW/glfw3.h>
+#include <cglm/affine.h>
 #include <cglm/cam.h>
 #include <cglm/cglm.h>
 #include <cglm/common.h>
@@ -111,17 +112,18 @@ int main() {
 
   Mesh *mesh = Mesh_new(vertices, indices, vertexCount, perVertexValueCount);
 
+  vec3 cubePositions[] = {{0.0f, 0.0f, 0.0f},    {2.0f, 5.0f, -15.0f},
+                          {-1.5f, -2.2f, -2.5f}, {-3.8f, -2.0f, -12.3f},
+                          {2.4f, -0.4f, -3.5f},  {-1.7f, 3.0f, -7.5f},
+                          {1.3f, -2.0f, -2.5f},  {1.5f, 2.0f, -2.5f},
+                          {1.5f, 0.2f, -1.5f},   {-1.3f, 1.0f, -1.5f}};
   // Matrices
 
   // render loop
   Shader_use(shader);
   Shader_setInt(shader, "texture1", 0);
   Shader_setInt(shader, "texture2", 1);
-  GLuint start_time = glfwGetTimerValue();
   while (!App_should_close(app)) {
-    GLuint current_time = glfwGetTimerValue();
-    current_time = current_time - start_time;
-    GLfloat time = 0.00000001 * (GLfloat)current_time;
 
     App_handle_inputs(app);
     // render
@@ -138,22 +140,36 @@ int main() {
     Shader_use(shader);
 
     // transforms
-    mat4 model_matrix = GLM_MAT4_IDENTITY_INIT;
-    vec3 model_axis = {0.5, 1.0, 0.0};
-    glm_rotate(model_matrix, time, model_axis);
-
-    mat4 view_matrix = GLM_MAT4_IDENTITY_INIT;
-    vec3 view_translation = {0.0, 0.0, -3.0};
-    glm_translate(view_matrix, view_translation);
-
     mat4 projection_matrix = GLM_MAT4_IDENTITY_INIT;
-    glm_perspective(glm_radians(100.0), (GLfloat)WIDTH / (GLfloat)HEIGHT, 0.1,
-                    100.0, projection_matrix);
 
-    Shader_setMat4(shader, "model", (GLfloat *)model_matrix);
-    Shader_setMat4(shader, "view", (GLfloat *)view_matrix);
+    glm_perspective(glm_radians(100.0), App_fov(app), 0.1, 100.0,
+                    projection_matrix);
     Shader_setMat4(shader, "projection", (GLfloat *)projection_matrix);
-    Mesh_draw(mesh, 0);
+    GLuint start = glfwGetTimerValue();
+
+    for (int i = 0; i < 10; i++) {
+      GLuint current_time = glfwGetTimerValue() - start;
+
+      mat4 model_matrix = GLM_MAT4_IDENTITY_INIT;
+      GLfloat angle = 20.0 * i;
+      glm_mat4_scale(model_matrix, 1000.0);
+      vec3 model_axis = {0.5, 1.0, 0.0};
+      GLfloat rotate = 1.0;
+      if (i % 3 == 0) {
+        rotate = (GLfloat)current_time * 0.00001;
+      }
+      glm_rotate(model_matrix, glm_radians(angle * rotate), model_axis);
+
+      glm_translate(model_matrix, cubePositions[i]);
+
+      mat4 view_matrix = GLM_MAT4_IDENTITY_INIT;
+      vec3 view_translation = {0.0, 0.0, -2.0};
+      glm_translate(view_matrix, view_translation);
+
+      Shader_setMat4(shader, "model", (GLfloat *)model_matrix);
+      Shader_setMat4(shader, "view", (GLfloat *)view_matrix);
+      Mesh_draw(mesh, 0);
+    }
 
     App_handle_events(app);
   }
