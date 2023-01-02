@@ -7,3 +7,9 @@ typedef struct Vertex_ {
   GLfloat color[3];
   GLfloat texCoords[2];
 } Vertex;
+
+typedef struct VertexData_ {
+  Vertex *data;
+  GLuint *indices;
+  GLuint count;
+} VertexData;

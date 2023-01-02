@@ -40,6 +40,7 @@ App *App_new(const char *name, const int width, const int height) {
   current_app = self;
   return self;
 }
+void App_focus(App *app) { current_app = app; }
 int App_should_close(App *self) { return glfwWindowShouldClose(self->window); }
 void App_set_resize_callback(App *self, void(callback)(GLFWwindow *window,
                                                        int width, int height)) {
@@ -55,7 +56,7 @@ void App_handle_inputs(App *self) {
     glfwSetWindowShouldClose(self->window, true);
 }
 
-GLfloat App_fov(App *self) {
+inline GLfloat App_fov(App *self) {
   return (GLfloat)self->width / (GLfloat)self->height;
 }
 void App_destroy(App *self) {

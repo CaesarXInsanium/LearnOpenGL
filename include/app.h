@@ -12,6 +12,7 @@ typedef struct App {
 } App;
 
 App *App_new(const char *name, const int width, const int height);
+void App_focus(App *app);
 int App_should_close(App *self);
 void App_set_resize_callback(App *self,
                              void (*callback)(GLFWwindow *window, int width,

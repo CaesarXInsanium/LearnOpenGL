@@ -5,6 +5,7 @@
 #include "mesh.h"
 #include "shader.h"
 #include "stb_image.h"
+#include "texture.h"
 #include <GLFW/glfw3.h>
 #include <cglm/affine.h>
 #include <cglm/cam.h>
@@ -19,11 +20,15 @@
 #define M_PI 3.14159265358979323846264338327950288
 #define glm_radians(angleInDegrees) ((angleInDegrees)*M_PI / 180.0)
 
+#define VEC3F_INIT                                                             \
+  { 0.0, 0.0, 0.0 }
+
 // settings
 const unsigned int WIDTH = 800;
 const unsigned int HEIGHT = 600;
+const GLuint TEXTURE_COUNT = 2;
 
-int main() {
+int main(int argc, char **argv) {
   // glfw: initialize and configure
   // ------------------------------
   App *app = App_new("LearnOpenGL", WIDTH, HEIGHT);
@@ -161,6 +166,17 @@ int main() {
       glm_rotate(model_matrix, glm_radians(angle * rotate), model_axis);
 
       glm_translate(model_matrix, cubePositions[i]);
+
+      vec3 cameraPos = {0.0, 0.0, 3.0};
+      vec3 cameraTarget = {0.0, 0.0, 0.0};
+      vec3 cameraDirection = VEC3F_INIT;
+      glm_vec3_sub(cameraPos, cameraTarget, cameraDirection);
+      glm_vec3_normalize(cameraDirection);
+
+      vec3 up = {0.0, 1.0, 0.0};
+      vec3 cameraRight;
+      glm_vec3_cross(up, cameraDirection, cameraRight);
+      glm_vec3_normalize(cameraRight);
 
       mat4 view_matrix = GLM_MAT4_IDENTITY_INIT;
       vec3 view_translation = {0.0, 0.0, -2.0};

@@ -3,7 +3,7 @@ BIN=$(BUILD_DIR)/learn
 
 
 all: $(BUILD_DIR)
-	meson compile -C $(BUILD_DIR)
+	meson compile -v -C $(BUILD_DIR)
 
 $(BUILD_DIR):
 	meson setup $(BUILD_DIR)

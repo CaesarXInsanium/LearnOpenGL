@@ -23,7 +23,7 @@ void Shader_setMat4(Shader *self, const char *name, GLfloat *value);
 // stolen from:
 // https://stackoverflow.com/questions/2029103/correct-way-to-read-a-text-file-into-a-buffer-in-c
 char *loadSourceFile(const char *path);
-GLuint GLShaderProgram_fromChar(const char *vertexShader,
+GLuint GLShaderProgram_from_char(const char *vertexShader,
                                 const char *fragmentShader);
 
 #endif

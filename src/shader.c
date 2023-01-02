@@ -7,7 +7,7 @@ Shader *Shader_new(const char *vertexPath, const char *fragmentPath) {
   char *vertexShaderSource = loadSourceFile(vertexPath);
   char *fragmentShaderSource = loadSourceFile(fragmentPath);
   GLuint shaderProgram =
-      GLShaderProgram_fromChar(vertexShaderSource, fragmentShaderSource);
+      GLShaderProgram_from_char(vertexShaderSource, fragmentShaderSource);
 
   self->ID = shaderProgram;
   return self;
@@ -66,8 +66,8 @@ char *loadSourceFile(const char *path) {
   return source;
 }
 
-GLuint GLShaderProgram_fromChar(const char *vertexShaderSource,
-                                const char *fragmentShaderSource) {
+GLuint GLShaderProgram_from_char(const char *vertexShaderSource,
+                                 const char *fragmentShaderSource) {
 
   // build and compile our shader program
   // ------------------------------------

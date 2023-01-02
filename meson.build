@@ -17,7 +17,8 @@ SRC = [
   'src/gl.c',
   'src/mesh.c',
   'src/shader.c',
-  'src/app.c'
+  'src/app.c',
+  #'src/texture.c',
   ]
 INC = include_directories('include')
 
